@@ -8,3 +8,5 @@
 
 [c游戏设计](gamedesign/)
 
+<a href="/git使用.zip">文件下载功能测试</a>
+
