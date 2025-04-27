@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SQL字符转换工具</title>
+  <script src="./js/vue.global.js"></script>
+  <!-- <link href="./css/style.css" type="text/css" rel="stylesheet"> -->
+  <link href="./css/pico.min.css" type="text/css" rel="stylesheet">
+  <link rel="stylesheet" href="./css/pico.colors.min.css">
+  <style>
+    /* 新增样式 */
+    .flex-container {
+      display: flex;
+      justify-content: flex-start;  /* 改为左对齐 */
+      align-items: flex-start;
+      flex-wrap: wrap;  /* 新增换行属性 */
+      gap: 10px;  /* 元素间距 */
+    }
+
+    .flex-button-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <!-- 首部 -->
+    <header>
+      <h1 style="text-align: center; margin-top: 20px;">SQL字符转换工具</h1>
+    </header>
+    <article class="container">
+      <div class="flex-container" style="margin-left: 20px;">
+        <label style="min-width: 150px;" v-for="item in menuItems" :key="item.name">
+          <input type="checkbox" :name="item.name" v-model="menu[item.model]" />
+          {{ item.label }}
+        </label>
+      </div>
+    </article>
+
+    <!-- 主体部分 -->
+    <main class="container">
+      <div class="flex-container">
+        <!-- 工具栏 -->
+        <div style="flex: 0 0 320px">
+          <article>
+            <h2>工具栏</h2>
+            <!-- 通用 -->
+            <details v-if="menu.general" :open="detailStates.general"
+              @toggle="detailStates.general = $event.target.open">
+              <summary>通用设置</summary>
+              <article>
+                <label>
+                  <input class="pico-background-azure-200" name="darkMode" type="checkbox" role="switch"
+                    v-model="darkMode" />
+                  {{ darkMode ? ' 关闭黑暗模式' : ' 打开黑暗模式' }}
+                </label>
+                <label>
+                  <input class="pico-background-azure-200" name="add_space" type="checkbox" role="switch"
+                    v-model="add_space" />
+                  左右加空格
+                </label>
+                <label>
+                  <input class="pico-background-azure-200" name="add_space" type="checkbox" role="switch"
+                    v-model="show_input_textarea" />
+                  显示输入框
+                </label>
+                <label>
+                  <input class="pico-background-azure-200" name="add_space" type="checkbox" role="switch"
+                    v-model="show_output_textarea" />
+                  显示输出框
+                </label>
+                <hr>
+                <div class="flex-button-container">
+                  <button class="pico-background-azure-200" data-tooltip="清空输入框和输出框" data-placement="Top"
+                    @click="CLEARTEXT">清空</button>
+                  <button class="pico-background-azure-200" data-tooltip="复制输出框文本到剪贴板" data-placement="Top"
+                    @click="COPYOUT">复制输出</button>
+                </div>
+                <!-- <button class="pico-background-azure-250" data-tooltip="保存当前设置" 
+                    @click="saveSettings">
+                    保存设置
+                  </button> -->
+              </article>
+
+            </details>
+            <!-- delphi -->
+            <details v-if="menu.delphi" :open="detailStates.delphi" @toggle="detailStates.delphi = $event.target.open">
+              <summary>Delphi</summary>
+              <article>
+                <label>
+                  <input name="opt-in" type="checkbox" role="switch" v-model="sql2delphi_set" />
+                  带换行(#13#10)
+                </label>
+                <hr>
+                <div class="flex-button-container">
+                  <button class="pico-background-azure-50" data-tooltip="把SQL转换为Delphi代码字符串" data-placement="Top"
+                    @click="SQL2DELPHI">SQL转DELPHI</button>
+                  <button class="pico-background-azure-50" data-tooltip="把Delphi代码字符串转换为SQL" data-placement="Top"
+                    @click="DELPHI2SQL">DELPHI转SQL</button>
+                </div>
+              </article>
+
+
+            </details>
+            <!-- c -->
+            <details v-if="menu.c" :open="detailStates.c" @toggle="detailStates.c = $event.target.open">
+              <summary>C</summary>
+              <article>
+                <div class="flex-button-container">
+                  <button class="pico-background-azure-50" data-tooltip="把SQL转换为C代码字符串" data-placement="Top"
+                    @click="SQL2C">SQL转C</button>
+                  <button class="pico-background-azure-50" data-tooltip="把C代码字符串转换为SQL" data-placement="Top"
+                    @click="C2SQL">C转SQL</button>
+                </div>
+              </article>
+
+            </details>
+            <!-- java -->
+            <details v-if="menu.java" :open="detailStates.java" @toggle="detailStates.java = $event.target.open">
+              <summary>JAVA</summary>
+              <article>
+                <div class="flex-button-container">
+                  <button class="pico-background-azure-50" data-tooltip="把SQL转换为Java代码字符串" data-placement="Top"
+                    @click="SQL2JAVA">SQL转JAVA</button>
+                  <button class="pico-background-azure-50" data-tooltip="把Java代码字符串转换为SQL" data-placement="Top"
+                    @click="JAVA2SQL">JAVA转SQL</button>
+                </div>
+              </article>
+
+            </details>
+            <!-- 模版 -->
+            <details v-if="menu.template" :open="detailStates.template"
+              @toggle="detailStates.template = $event.target.open">
+              <summary>模板处理</summary>
+              <article class="flex-button-container">
+                <label>
+                  说明：#text# 代表输入框的文本
+
+                </label>
+                <input style="margin-bottom: 0px;" aria-label="Text" type="text" v-model="string_template">
+                <hr>
+                <button class=" pico-background-azure-200" @click="STR2TEMPLATE">模板字符串处理</button>
+              </article>
+
+            </details>
+            <!-- 其他 -->
+            <details v-if="menu.other" :open="detailStates.other" @toggle="detailStates.other = $event.target.open">
+              <summary>其他功能</summary>
+              <article class="flex-button-container">
+                <button class="pico-background-azure-200" @click="OTHERDEAL">其他功能执行</button>
+                <hr>
+                <select v-model="other_select">
+                  <option value="0">去除左右多余空格</option>
+                  <option value="1">字段对齐</option>
+                  <option value="2">单引号翻倍</option>
+                  <option value="3">单引号减半</option>
+                </select>
+                <div v-if="other_select==1">
+                  <label>
+                    文本对齐每行字段个数
+                    <input type="number" v-model="align_word_num">
+                  </label>
+                  <label>
+                    文本对齐每字段最大长度
+                    <input type="number" v-model="align_word_len">
+                  </label>
+                </div>
+
+              </article>
+            </details>
+            <!-- 分库分表查询 -->
+            <details v-if="menu.sharding_database" :open="detailStates.sharding_database"
+              @toggle="detailStates.sharding_database = $event.target.open">
+              <summary>分库分表查询</summary>
+              <article class="flex-button-container">
+                <button class="pico-background-azure-200" @click="SHARDINGQUERY">生成查询语句</button>
+                <hr>
+                <label>
+                  分库数量
+                  <input type="number" v-model="sharding_database.database_num">
+                </label>
+                <label>
+                  分表数量
+                  <input type="number" v-model="sharding_database.table_num">
+                </label>
+                <label>
+                  分库名
+                  <input type="text" v-model="sharding_database.database_name">
+                </label>
+                <label>
+                  分表名
+                  <input type="text" v-model="sharding_database.table_name">
+                </label>
+                <label>
+                  拼接字段
+                  <input type="text" v-model="sharding_database.table_fields">
+                </label>
+                <label>
+                  拼接条件
+                  <input type="text" v-model="sharding_database.table_condition">
+                </label>
+              </article>
+            </details>
+          </article>
+        </div>
+
+        <!-- 输入框 -->
+        <div style="flex-grow: 1;" v-if="show_input_textarea">
+          <article>
+            <div class="grid">
+              <h2>输入框</h2>
+              <button class="pico-background-azure-200" data-tooltip="清空输入框和输出框" data-placement="Top"
+                @click="CLEARTEXT">清空</button>
+            </div>
+            <hr>
+            <textarea id="input_textarea" wrap="off" v-model="input_textarea" style="height: calc(100vh - 440px);"></textarea>
+          </article>
+        </div>
+
+        <!-- 输出框 -->
+        <div style="flex-grow: 1;" v-if="show_output_textarea">
+          <article>
+            <div class="grid">
+              <h2>输出框</h2>
+              <button class="pico-background-azure-200" data-tooltip="复制输出框文本到剪贴板" data-placement="Top"
+                @click="COPYOUT">复制输出</button>
+            </div>
+            <hr>
+            <textarea id="output_textarea" wrap="off" v-model="output_textarea" style="height: calc(100vh - 440px);"></textarea>
+          </article>
+        </div>
+      </div>
+    </main>
+
+    <!-- 尾部 -->
+    <footer>
+      <p style="text-align:center">&copy;2025 sangdm 最近更新日期:2025-04-27</p>
+    </footer>
+  </div>
+</body>
+<script src="js/myjs.js"></script>
+
+</html>

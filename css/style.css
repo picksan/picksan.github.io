@@ -1,0 +1,219 @@
+/* General setup */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0 auto;
+    min-width: 1000px;
+    /* max-width: 1400px; */
+}
+
+/* 设置浮动 */
+section {
+    float: left;
+    width: 40%;
+}
+
+aside {
+    float: left;
+    width: 40%;
+}
+
+nav {
+    float: left;
+    width: 20%;
+}
+
+footer {
+    clear: both;
+}
+
+/* 设置默认的间隔 */
+header,
+section,
+aside,
+nav,
+footer {
+    padding: 20px;
+}
+
+/* header and footer */
+
+header,
+footer {
+    border-top: 5px solid #67c23a;
+    border-bottom: 5px solid #f56c6c;
+   /* border-left: 5px solid #409eff;
+    border-right: 5px solid #e6a23c; */
+    background-color: rgb(240, 249, 235);
+}
+
+/* WRITE YOUR CODE BELOW HERE */
+textarea {
+    width: 100%;
+    min-height: 600px;
+    line-height: normal;
+    overflow: visible;
+    word-wrap: normal;
+    resize: vertical;
+    font-size: 16px;
+    padding: 10px;
+    line-height: 1.5;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    box-shadow: 1px 1px 1px #999;
+    letter-spacing: 1px;
+}
+
+ul,
+li {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+/*横向列表*/
+#nav {
+  background-color: #690;
+}
+#nav ul{
+  list-style: none;
+}
+#nav li{
+  display: inline;
+}
+#nav a{
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 20px;
+  padding-right: 20px;
+  text-decoration: none;
+  color: #fff;
+  line-height: 40px;
+}
+#nav a:hover{
+  background-color: #060;
+}
+
+
+.label-green {
+  border-left: 5px solid #67c23a; 
+  background-color: rgb(240, 249, 235);
+  padding-left: 10px;
+}
+
+/* 按钮的大小 */
+.button-middle {
+    width: 100%;
+    max-width: 150px;
+    height: 30px;
+    margin-top: 10px;
+    text-align: center;
+}
+
+.button-middle-left {
+    width: 80%;
+    max-width: 150px;
+    height: 20px;
+    margin-top: 10px;
+    text-align: center;
+}
+
+/* 点击按钮的样式 */
+.btn-primary {
+    color: #fff;
+    background-color: #a66;
+    border-color: #a66;
+}
+
+.btn-primary:focus {
+    box-shadow: 0 0 0 .2rem rgba(170, 102, 102, .5);
+}
+
+.btn-primary:hover {
+    color: #fff;
+    background-color: rgb(109, 35, 35);
+    border-color: rgb(109, 35, 35);
+    text-decoration: none;
+}
+
+/* 点击按钮的样式 */
+.btn-info {
+    color: #fff;
+    background-color: #909399;
+    border-color: #909399;
+}
+
+.btn-info:focus {
+    box-shadow: 0 0 0 .2rem rgba(144, 147, 153, 0.5);
+}
+
+.btn-info:hover {
+    color: #fff;
+    background-color: rgb(144, 147, 153);
+    border-color: rgb(144, 147, 153);
+    text-decoration: none;
+}
+
+/* 点击按钮的样式 */
+.btn-blue {
+    color: #fff;
+    background-color: #409eff;
+    border-color: #409eff;
+}
+
+.btn-blue:focus {
+    box-shadow: 0 0 0 .2rem rgba(64, 158, 255, 0.5);
+}
+
+.btn-blue:hover {
+    color: #fff;
+    background-color: rgb(52, 131, 209);
+    border-color:  rgb(52, 131, 209);
+    text-decoration: none;
+}
+
+/* 点击按钮的样式 */
+.btn-red {
+    color: #fff;
+    background-color: #f56c6c;
+    border-color: #f56c6c;
+}
+
+.btn-red:focus {
+    box-shadow: 0 0 0 .2rem rgba(245, 108, 108, 0.5);
+}
+
+.btn-red:hover {
+    color: #fff;
+    background-color: rgb(199, 87, 87);
+    border-color:  rgb(199, 87, 87);
+    text-decoration: none;
+}
+
+/* 点击按钮的样式 */
+.btn-green {
+    color: #fff;
+    background-color: #67c23a;
+    border-color: #67c23a;
+}
+
+.btn-green:focus {
+    box-shadow: 0 0 0 .2rem rgba(103, 194, 58, 0.5);
+}
+
+.btn-green:hover {
+    color: #fff;
+    background-color: rgb(88, 166, 49);
+    border-color: rgb(88, 166, 49);
+    text-decoration: none;
+}
+
+[type=button]:not(:disabled),
+[type=reset]:not(:disabled),
+[type=submit]:not(:disabled),
+button:not(:disabled) {
+    cursor: pointer;
+}
