@@ -11,13 +11,22 @@
   <link href="./css/pico.min.css" type="text/css" rel="stylesheet">
   <link rel="stylesheet" href="./css/pico.colors.min.css">
   <style>
+    body,
+    html {
+      /* 背景颜色 */
+      background-color: #f0f0f0;
+    }
+
     /* 新增样式 */
     .flex-container {
       display: flex;
-      justify-content: flex-start;  /* 改为左对齐 */
+      /* 改为左对齐 */
+      justify-content: flex-start;
       align-items: flex-start;
-      flex-wrap: wrap;  /* 新增换行属性 */
-      gap: 10px;  /* 元素间距 */
+      /* 新增换行属性 */
+      flex-wrap: wrap;
+      /* 元素间距 */
+      gap: 10px;
     }
 
     .flex-button-container {
@@ -25,29 +34,111 @@
       flex-direction: column;
       gap: 8px;
     }
+
+    /* 新增文本区域字体设置 */
+    textarea {
+      font-size: 14px;
+      /* 调整字体大小 */
+      font-family: Consolas, monospace;
+      /* 设置等宽字体 */
+      line-height: 1.5;
+      /* 增加行高 */
+      height: calc(100vh - 350px);
+      /* 动态计算高度 */
+      min-height: 200px;
+      /* 最小高度 */
+      max-height: 85vh;
+      /* 最大高度 */
+    }
+
+    /* 新增工具栏优化样式 */
+    .toolbar-container {
+      max-height: 80vh;
+      /* 限制工具栏高度 */
+      overflow-y: auto;
+      /* 启用垂直滚动 */
+      position: sticky;
+      /* 粘性定位 */
+      top: 20px;
+      /* 距离顶部间距 */
+    }
+
+    /* 调整工具栏字体大小 */
+    details>summary {
+      padding: 0.5rem;
+      /* 减少内边距 */
+    }
+
+    /* 按钮紧凑布局 */
+    .flex-button-container button {
+      margin: 2px 0;
+      /* 减少按钮间距 */
+      padding: 0.5rem;
+      /* 调整按钮内边距 */
+    }
+
+    /* 主内容区适配 */
+    main .flex-container {
+      align-items: flex-start;
+      /* 顶部对齐 */
+      gap: 20px;
+      /* 增加区域间距 */
+    }
+
+    .input-panel,
+    .output-panel {
+      max-height: 85vh;
+      /* 限制工具栏高度 */
+      overflow-y: auto;
+      /* 启用垂直滚动 */
+      position: sticky;
+      /* 粘性定位 */
+      flex-grow: 1;
+    }
+
+    footer>p {
+      margin-bottom: 0px;
+      /* 底部间距 */
+    }
+
+    button {
+      padding: 0px;
+    }
+
+    .tool-header {
+      font-size: 24px;
+      /* 标题字体大小 */
+      font-weight: bold;
+      /* 加粗 */
+    }
   </style>
 </head>
 
 <body>
   <div id="app">
     <!-- 首部 -->
-    <header>
+    <!-- <header>
       <h1 style="text-align: center; margin-top: 20px;">SQL字符转换工具</h1>
-    </header>
-    <article class="container">
+    </header> -->
+    <article>
       <div class="flex-container" style="margin-left: 20px;">
+        <label class="tool-header">SQL字符转换工具</label> |
         <label style="min-width: 150px;" v-for="item in menuItems" :key="item.name">
           <input type="checkbox" :name="item.name" v-model="menu[item.model]" />
           {{ item.label }}
-        </label>
+        </label> |
+        <button class="pico-background-azure-200" data-tooltip="清空输入框和输出框" data-placement="bottom"
+          @click="CLEARTEXT">清空</button>
+        <button class="pico-background-azure-200" data-tooltip="复制输出框文本到剪贴板" data-placement="bottom"
+          @click="COPYOUT">复制输出</button>
       </div>
     </article>
 
     <!-- 主体部分 -->
-    <main class="container">
+    <main>
       <div class="flex-container">
         <!-- 工具栏 -->
-        <div style="flex: 0 0 320px">
+        <div style="flex: 0 0 320px" class="toolbar-container">
           <article>
             <h2>工具栏</h2>
             <!-- 通用 -->
@@ -82,12 +173,26 @@
                   <button class="pico-background-azure-200" data-tooltip="复制输出框文本到剪贴板" data-placement="Top"
                     @click="COPYOUT">复制输出</button>
                 </div>
-                <!-- <button class="pico-background-azure-250" data-tooltip="保存当前设置" 
-                    @click="saveSettings">
-                    保存设置
-                  </button> -->
               </article>
 
+            </details>
+            <details v-if="menu.general">
+              <summary>链式处理</summary>
+              <article class="chain-container">
+                <div class="chain-controls">
+                  <select v-model="selectedStep" @change="addStep">
+                    <option v-for="step in availableSteps" :value="step.value">{{ step.label }}</option>
+                  </select>
+                  <button @click="executeChain">执行链式处理</button>
+                </div>
+
+                <div class="selected-steps">
+                  <div v-for="(step, index) in chainSteps" :key="index" class="step-item">
+                    {{ getStepLabel(step) }}
+                    <button @click="removeStep(index)">×</button>
+                  </div>
+                </div>
+              </article>
             </details>
             <!-- delphi -->
             <details v-if="menu.delphi" :open="detailStates.delphi" @toggle="detailStates.delphi = $event.target.open">
@@ -211,28 +316,28 @@
         </div>
 
         <!-- 输入框 -->
-        <div style="flex-grow: 1;" v-if="show_input_textarea">
+        <div class="input-panel" v-if="show_input_textarea">
           <article>
             <div class="grid">
               <h2>输入框</h2>
-              <button class="pico-background-azure-200" data-tooltip="清空输入框和输出框" data-placement="Top"
+              <button class="pico-background-azure-200" data-tooltip="清空输入框和输出框" data-placement="bottom"
                 @click="CLEARTEXT">清空</button>
             </div>
             <hr>
-            <textarea id="input_textarea" wrap="off" v-model="input_textarea" style="height: calc(100vh - 440px);"></textarea>
+            <textarea id="input_textarea" wrap="off" v-model="input_textarea"></textarea>
           </article>
         </div>
 
         <!-- 输出框 -->
-        <div style="flex-grow: 1;" v-if="show_output_textarea">
+        <div class="output-panel" v-if="show_output_textarea">
           <article>
             <div class="grid">
               <h2>输出框</h2>
-              <button class="pico-background-azure-200" data-tooltip="复制输出框文本到剪贴板" data-placement="Top"
+              <button class="pico-background-azure-200" data-tooltip="复制输出框文本到剪贴板" data-placement="bottom"
                 @click="COPYOUT">复制输出</button>
             </div>
             <hr>
-            <textarea id="output_textarea" wrap="off" v-model="output_textarea" style="height: calc(100vh - 440px);"></textarea>
+            <textarea id="output_textarea" wrap="off" v-model="output_textarea"></textarea>
           </article>
         </div>
       </div>
@@ -240,7 +345,7 @@
 
     <!-- 尾部 -->
     <footer>
-      <p style="text-align:center">&copy;2025 sangdm 最近更新日期:2025-04-27</p>
+      <p style="text-align:center">&copy;2025 sangdm 最近更新日期:2025-05-16</p>
     </footer>
   </div>
 </body>
