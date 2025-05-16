@@ -362,6 +362,18 @@ createApp({
         table_fields: 'c_fundcode,c_agencyno',
         table_condition: "c_fundcode = '025010' and agencyno = '002'",
       },
+      chainSteps: [],       // 存储选择的处理步骤
+      availableSteps: [     // 所有可用处理步骤
+        { label: 'C转SQL', value: 'C2SQL' },
+        { label: 'SQL转C', value: 'SQL2C' },
+        { label: 'SQL转Delphi', value: 'SQL2DELPHI' },
+        { label: 'Delphi转SQL', value: 'DELPHI2SQL' },
+        { label: 'SQL转JAVA', value: 'SQL2JAVA' },
+        { label: 'JAVA转SQL', value: 'JAVA2SQL' },
+        { label: '单引号翻倍', value: 'TWO_SINGLE_QUOTES' },
+        { label: '单引号减半', value: 'ONE_SINGLE_QUOTES' }
+      ],
+      selectedStep: null,    // 当前选中的处理步骤
     }
   },
   created() {
@@ -468,6 +480,40 @@ createApp({
     CLEARTEXT() {
       this.input_textarea = '';
       this.output_textarea = '';
+    },
+    // 新增链式处理方法
+    addStep() {
+      if (this.selectedStep && !this.chainSteps.includes(this.selectedStep)) {
+        this.chainSteps.push(this.selectedStep);
+      }
+      this.selectedStep = null;
+    },
+    removeStep(index) {
+      this.chainSteps.splice(index, 1);
+    },
+    getStepLabel(value) {
+      return this.availableSteps.find(s => s.value === value)?.label || value;
+    },
+    executeChain() {
+      let processed = this.input_textarea;
+      this.chainSteps.forEach(step => {
+        const processor = this.getProcessor(step);
+        processed = processor(processed);
+      });
+      this.output_textarea = processed;
+    },
+    getProcessor(step) {
+      const processors = {
+        'C2SQL': text => processInputText(this, text, c_to_sql_line_deal),
+        'SQL2C': text => processInputText(this, text, sql_to_c_line_deal),
+        'SQL2DELPHI': text => processInputText(this, text, sql_to_delphi_line_deal),
+        'DELPHI2SQL': text => processInputText(this, text, delphi_to_sql_line_deal),
+        'SQL2JAVA': text => processInputText(this, text, sql_to_java_line_deal),
+        'JAVA2SQL': text => processInputText(this, text, java_to_sql_line_deal),
+        'TWO_SINGLE_QUOTES': text => processInputText(this, text, two_single_quotes_line_deal),
+        'ONE_SINGLE_QUOTES': text => processInputText(this, text, one_single_quotes_line_deal)
+      };
+      return processors[step] || (t => t);
     },
     //SQL转Delphi字符串
     SQL2DELPHI() {
